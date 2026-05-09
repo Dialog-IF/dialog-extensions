@@ -21,8 +21,6 @@ These extensions are written for Dialog 1a/01 and later, and aren't guaranteed t
 
 `bearing.dg` -- Implement 360 degree headings and bearings, and calculate movement to any compass heading.
 
-`facing.dg` -- Light-weight version of bearing.dg for vintage hardware, based around eight directions.
-
 `unit.dg` -- Standard Dialog unit testing framework. Get this from the Dialog source distribution for the most up-to-date version.
 
 `unit-0m03.dg` -- Version of `unit.dg` compatible with Dialog 0m/03 and 1a/01.
