@@ -492,3 +492,88 @@
 #intentionally-fail-yet-another
 %%(test *)
 (run *)	(fail)
+
+#find-2-2
+(test *)
+(run *)
+	  (list of lists $List)
+	  (find in $List beginning with sublist [2 2] into [2 2 4 5 6])
+
+#dont-find-9-9
+(test *)
+(run *)
+	  (list of lists $List)
+	  ~(find in $List beginning with sublist [9 9] into $)
+
+#remove-1-2
+(test *)
+(run *)
+	  (list of lists $List)
+	  (remove from $List beginning with sublist [1 2] into $NewList)
+	  (assert $NewList = [
+		[2 2 4 5 6]
+		[3 2 4 5 6]
+		[3 2 4 6 7]
+		[4 1 7 8 9]])
+
+#remove-1-2-twice
+(test *)
+(run *)
+	  (list of lists $List)
+	  (remove from $List beginning with sublist [1 2] into $NewList)
+	  (remove from $NewList beginning with sublist [1 2] into $NewerList)
+	  (assert $NewerList = [
+		[2 2 4 5 6]
+		[3 2 4 5 6]
+		[3 2 4 6 7]
+		[4 1 7 8 9]])
+
+#remove-2-2
+(test *)
+(run *)
+	  (list of lists $List)
+	  (remove from $List beginning with sublist [2 2] into $NewList)
+	  (assert $NewList = [
+	  	[1 2 3 4 5]
+		[3 2 4 5 6]
+		[3 2 4 6 7]
+		[4 1 7 8 9]])
+
+#remove-3-2
+(test *)
+(run *)
+	  (list of lists $List)
+	  (remove from $List beginning with sublist [3 2] into $NewList)
+	  (assert $NewList = [
+	  	[1 2 3 4 5]
+		[2 2 4 5 6]
+		[3 2 4 6 7]
+		[4 1 7 8 9]])
+
+#remove-3-2-twice
+(test *)
+(run *)
+	  (list of lists $List)
+	  (remove from $List beginning with sublist [3 2] into $NewList)
+	  (remove from $NewList beginning with sublist [3 2] into $NewerList)
+	  (assert $NewerList = [
+	  	[1 2 3 4 5]
+		[2 2 4 5 6]
+		[4 1 7 8 9]])
+
+#remove-4-1
+(test *)
+(run *)
+	  (list of lists $List)
+	  (remove from $List beginning with sublist [4 1] into $NewList)
+	  (assert $NewList = [
+	  	[1 2 3 4 5]
+		[2 2 4 5 6]
+		[3 2 4 5 6]
+		[3 2 4 6 7]])
+
+#remove-7-7
+(test *)
+(run *)
+	  (list of lists $List)
+	  (remove from $List beginning with sublist [7 7] into $List)

@@ -66,10 +66,11 @@
 %% duplicates) sublist that begins with the specified sublist.
 (interface (find in $<List beginning with sublist $<Head into $>Match))
 
-%% Set an element in a sublist beginning with a specified beginning.
+%% Pick out the sublist with the highest value for the specified element.
+(interface (find in $<List with highest element $<Num into $>Match))
+
 (interface (set element $<Num in $<Head in $<List to $<Value into $>NewList))
 
-%% Remove a sublist from a list-of-lists that matches a specified beginning.
 (interface (remove from $<List beginning with sublist $<Head into $>NewList))
 
 %%------------------------------ IMPLEMENTATION ------------------------------
