@@ -1,7 +1,7 @@
 # dialog-extensions
 Useful extensions for the Dialog domain-specific Interactive Fiction language. These are mostly code-oriented, rather than player-facing, and can be quietly dropped in behind the scenes to simplify your code. Unit tests are provided for all of them, in the corresponding file ending in `-tests.dg`; running `make test` will run them all.
 
-At the moment, the repository is organized as a single flat directory with individual extension files. As more contributions come from more authors, we might need to reorganize this, either on a directory-per-author or directory-per-extension basis. If you have thoughts about how best to organize this repository, please file an issue.
+At the moment, the repository is organized as a single flat directory with individual extension files. As more contributions come from more authors, we might need to reorganize this, either on a directory-per-author or directory-per-extension basis. If you have thoughts about how best to organize this repository, please comment on issue #4.
 
 ## Modules
 
