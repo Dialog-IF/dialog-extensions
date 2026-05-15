@@ -1,21 +1,21 @@
 # dialog-extensions
-Useful extensions for the Dialog domain-specific Interactive Fiction language. Unit tests are provided for all of them, in the corresponding file ending in `-tests.dg`; running `make test` will run them all.
+Useful extensions for the Dialog domain-specific Interactive Fiction language. These are mostly code-oriented, rather than player-facing, and can be quietly dropped in behind the scenes to simplify your code. Unit tests are provided for all of them, in the corresponding file ending in `-tests.dg`; running `make test` will run them all.
 
-These extensions are written for Dialog 1a/01 and later, and aren't guaranteed to work out-of-the-box on 0m/03 or earlier, though they were first developed on 0m/03.
+At the moment, the repository is organized as a single flat directory with individual extension files. As more contributions come from more authors, we might need to reorganize this, either on a directory-per-author or directory-per-extension basis. If you have thoughts about how best to organize this repository, please file an issue.
 
 ## Modules
 
 `time.dg` -- Useful utilities for handling the date and time of day.
 
-`dice.dg` -- `UNDO`-safe random number generator, based around fair rolls with good randomness stored in a table. Uses an extra 446 bytes, plus code size.
-
-`dice-lite.dg` -- Smaller footprint version of `dice.dg` for vintage hardware.
-
-`d6.dg` -- Simplified version of `dice.dg` for games that only need six-sided dice. Uses an extra 446 bytes, plus code size.
-
-`d6-lite.dg` -- Smaller footprint version of `d6.dg` for vintage hardware.
-
 `utils.dg` -- Grab bag of useful methods for arithmetic and list handling.
+
+`dice.dg` -- `UNDO`-safe random number generator, based around fair rolls with good randomness stored in a table. 
+
+`dice-lite.dg` -- Version of `dice.dg` that just leans on the built-in `(random from $ to $ into $)` predicate.
+
+`d6.dg` -- Simplified version of `dice.dg` for games that only need six-sided dice.
+
+`d6-lite.dg` -- Version of `d6.dg` that just leans on the built-in `(random from $ to $ into $)` predicate.
 
 `grid.dg` -- Implement grid movement in a large open space.
 
