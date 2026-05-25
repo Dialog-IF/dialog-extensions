@@ -15,11 +15,11 @@
 
 %%----------------------------------------------------------------------------
 
-~(x increases west)  %% un-negate to make X increase as you go west, not east
+~(x increases west) %% un-negate to make X increase as you go west, not east
 
-~(y increases south) %% un-negate to make Y increase as you go south, not north
+(y increases south) %% un-negate to make Y increase as you go south not north
 
-~(one unit per square)   %% un-negate to make squares 1 unit, not 10
+(storing positions in units) %% un-negage to store in units, not grid squares
 
 ~(occupied squares block movement) %% un-negate to make objects obstacles
 
@@ -31,7 +31,7 @@
 %% you wish. For safety, starting the origin at [100 100] rather than [0 0] can
 %% prevent subtraction overflows.
 
-(global variable (map offset 100)) %% recommended safety margin
+(global variable (map offset 1000)) %% recommended safety margin
 
 (global variable (map size 1170))  %% largest map that we can range across
 
@@ -75,13 +75,7 @@
 
 (interface (another object can move to $<Position))
 
-%% Moving on the grid
-
 (interface ($<Object can jump $<Num obstacles)) %% 16383 = unlimited
-
-(interface ($<Object moves $<Num squares $<Direction)) %% raw squares
-
-(interface ($<Object moves $<Num units $<Direction)) %% adjusted for diagonal
 
 %% Most other games use floating point numbers, floating point math,
 %% trignometry, square roots, and so forth, to get ranges and bearings
@@ -91,6 +85,26 @@
 (interface (calculate range from $<Here to $<There into $>Range))
 
 (interface (range from $<Object to $<Target into $>Range))
+
+%% Simple 8-way directions
+
+(interface (direction from $<Here to $<There into $>Direction))
+
+(interface (target $<Target is $>Direction of $<Object))
+
+%% Moving on the grid
+
+(interface ($<Object moves $<Num squares $<Direction)) %% raw squares
+
+(interface ($<Object moves $<Num units $<Direction)) %% adjusted for diagonal
+
+(interface ($<Object moves $<Num squares toward position $<Destination))
+
+(interface ($<Object moves $<Num units toward position $<Destination))
+
+(interface ($<Object moves $<Num squares toward target $<Target))
+
+(interface ($<Object moves $<Num units toward target $<Target))
 
 %% ------------------------------ STATE ------------------------------
 
@@ -118,9 +132,17 @@
 (position $Place is on the map)
 	(fully bound $Place)
 	([$X $Y | $] = $Place)
-	(map offset $Offset)
+	(map offset $O)
+	(maximum coordinate value $M)
+	(if) (storing positions in units) (then)
+	    ($O times 10 into $Offset)
+		($M times 10 into $Product)
+		($Product plus 9 into $Max)
+	(else)
+	    ($Offset = $O)
+	    ($Max = $M)
+	(endif)
 	~($X < $Offset) ~($Y < $Offset)
-	(maximum coordinate value $Max)
 	~($X > $Max) ~($Y > $Max)
 
 (position $Place is off the map)
@@ -135,6 +157,7 @@
 	(endif)
 	([$X $Y | $] = $Place)
 	([$X $Y | $Tail] = $NewPosition)
+	(fully bound $NewPosition)
 	(now) ($Object position $NewPosition)
 
 (remove $Object from the map)
@@ -143,7 +166,15 @@
 (position $Here equals position $There)
 	([$X1 $Y1 | $] = $Here)
 	([$X2 $Y2 | $] = $There)
-	($X1 = $X2) ($Y1 = $Y2)
+	(if) (storing positions in units) (then)
+	    ($X1 divided by 10 into $HereX)
+	    ($Y1 divided by 10 into $HereY)
+	    ($X2 divided by 10 into $ThereX)
+	    ($Y2 divided by 10 into $ThereY)
+	    ([$HereX $HereY] = [$ThereX $ThereY])
+	(else)
+	    ([$X1 $Y1] = [$X2 $Y2])
+	(endif)
 
 ($Object is at the same position as $Target)
 	($Object position $Here)
@@ -166,12 +197,12 @@
     (objects at $Position into $List)
 	(length of $List into $Num)
 
+%% ------------------------- SQUARES AND COLLISIONS -------------------------
+
 (another object can move to $Position)
     (stacking limit $Limit)
 	(number of objects at $Position into $Num)
 	($Num < $Limit)
-
-%% ------------------------- SQUARES AND COLLISIONS -------------------------
 
 ($Num north from $Y into $NY)
 	(if) (y increases south) (then)
@@ -201,130 +232,59 @@
 		($X minus $Num into $NX)
 	(endif)
 
-(next coordinates $Relation from $X $Y into $NX $NY)
+(coordinates $Num $Relation from $X $Y into $NX $NY)
 	(fully bound $X) (fully bound $Y)
 	(if) ($Relation = #north) (then)
 		($X = $NX)
-		(1 north from $Y into $NY)
+		($Num north from $Y into $NY)
 	(elseif) ($Relation = #northeast) (then)
-		(1 east  from $X into $NX)
-		(1 north from $Y into $NY)
+		($Num east  from $X into $NX)
+		($Num north from $Y into $NY)
 	(elseif) ($Relation = #east)      (then)
-		(1 east  from $X into $NX)
+		($Num east  from $X into $NX)
 		($Y = $NY)
 	(elseif) ($Relation = #southeast) (then)
-		(1 east  from $X into $NX)
-		(1 south from $Y into $NY)
+		($Num east  from $X into $NX)
+		($Num south from $Y into $NY)
 	(elseif) ($Relation = #south)     (then)
 		($X = $NX)
-		(1 south from $Y into $NY)
+		($Num south from $Y into $NY)
 	(elseif) ($Relation = #southwest) (then)
-		(1 west  from $X into $NX)
-		(1 south from $Y into $NY)
+		($Num west  from $X into $NX)
+		($Num south from $Y into $NY)
 	(elseif) ($Relation = #west)      (then)
-		(1 west  from $X into $NX)
+		($Num west  from $X into $NX)
 		($Y = $NY)
 	(elseif) ($Relation = #northwest) (then)
-		(1 west  from $X into $NX)
-		(1 north from $Y into $NY)
+		($Num west  from $X into $NX)
+		($Num north from $Y into $NY)
 	(endif)
 
-(next square $Relation from $Place into $Result)
+($Squares squares $Relation from $Place into $Result)
 	([$X $Y | $Tail] = $Place)
-	(next coordinates $Relation from $X $Y into $NX $NY)
+	(if) (storing positions in units) (then)
+	    ($Squares times 10 into $Num)
+	(else)
+	    ($Squares = $Num)
+	(endif)
+	(coordinates $Num $Relation from $X $Y into $NX $NY)
 	([$NX $NY | $Tail] = $Result)
 
-%% Fails if we walk off the map to the north or west. Should we hit the
-%% boundary and stick at the point where we go out, instead?
+(next square $Relation from $Place into $Result)
+    (1 squares $Relation from $Place into $Result)
 
-($Num squares $Direction from $Place into $Result)
-	($Place = [$BigX $BigY | $Tail])
-	(if) ($Direction = #east) (or)
-		 ($Direction = #northeast) (or)
-		 ($Direction = #southeast)
-	(then)
-		($Num east from $BigX into $NewX)
-	(elseif) ($Direction = #west) (or)
-			 ($Direction = #northwest) (or)
-	     	 ($Direction = #southwest)
-	(then)
-		($Num west from $BigX into $NewX)
+(closest unoccupied square to $Place from $Place into $Place)
+
+(closest unoccupied square to $Place from $Origin into $Result)
+    (fully bound $Place) (fully bound $Origin)
+    (if) (another object can move to $Place) (then)
+	    ([$X $Y | $] = $Place)
+	    ([$X $Y]     = $Result)
 	(else)
-		($NewX = $BigX)
+	    (direction from $Place to $Origin into $Direction)
+		(next square $Direction from $Place into $New)
+		(closest unoccupied square to $New from $Origin into $Result)
 	(endif)
-	(if) ($Direction = #north) (or)
-		 ($Direction = #northeast) (or)
-		 ($Direction = #northwest)
-	(then)
-		($Num north from $BigY into $NewY)
-	(elseif) ($Direction = #south) (or)
-			 ($Direction = #southeast) (or)
-	     	 ($Direction = #southwest)
-	(then)
-		($Num south from $BigY into $NewY)
-	(else)
-		($NewY = $BigY)
-	(endif)
-	([$NewX $NewY | $Tail] = $Result)
-
-(next unoccupied square $Direction from $Here is $Num away)
-    (next square $Direction from $Here into $There)
-    (fully bound $There)
-	(if) (another object can move to $There) (then)
-	    ($Num = 1)
-	(else)
-	    (next unoccupied square $Direction from $There is $ThatMany away)
-		($ThatMany plus 1 into $Num)
-	(endif)
-
-%%--------------------------------- MOVEMENT ----------------------------------
-
-($ can jump 0 obstacles) %% always true
-
-($ can jump $ obstacles) %% override for more complicated cases
-    ~(occupied squares block movement)
-
-($ moves 0 squares $) %% do nothing
-
-($Object moves $Num squares $Direction)
-    (grid object $Object)
-    ($Object position $Here)
-    (next unoccupied square $Direction from $Here is $Moves away)
-	($Moves minus 1 into $Jumps)
-	(if) ~($Moves > $Num) ($Object can jump $Jumps obstacles) (then)
-	    ($Moves squares $Direction from $Here into $There)
-		(now) ($Object position $There)
-		($Num minus $Moves into $Remaining)
-		($Object moves $Remaining squares $Direction)
-	(endif)
-
-($ moves $ squares $) %% don't move if the above fails somehow
-
-($Units units is $Squares squares orthogonally)
-    (if) (one unit per square) (then)
-	    ($Units = $Squares)
-	(else)
-	    ($Units divided by 10 into $Squares rounding evenly)
-	(endif)
-
-%% limited to 1638 units at one per square, yielding 1170 squares, our max size
-($Units units is $Squares squares diagonally)
-    (if) (one unit per square) (then)
-        ($Units times 10 into $U)
-		($U divided by 14 into $Squares rounding evenly)
-	(else)
-	    ($Units divided by 14 into $Squares rounding evenly)
-	(endif)
-
-($Object moves $Num units $Direction)
-    (grid object $Object)
-	(if) ($Direction is one of [#northeast #northwest #southeast #southwest])
-	(then)
-	    ($Num units is $Squares squares diagonally)
-	(else)
-	    ($Num units is $Squares squares orthogonally)
-	(endif)
-	($Object moves $Squares squares $Direction)
 
 %%----------------------------------- RANGE -----------------------------------
 
@@ -387,17 +347,14 @@
 (look up range for 10 10 into 1414)
 
 (look up range for 0 $Y into $Result)
-	 (100 times $Y into $Result)
+    (100 times $Y into $Result)
 
 (look up range for $DX $DY into $Result)
+    ($DX < 11) ($DY < 11)
 	(sort $DX $DY into $X $Y)
 	(look up range for $X $Y into $Result)
 
-(calculate range from $Here to $There into $Range)
-	([$HX $HY | $] = $Here)
-	([$TX $TY | $] = $There)
-	($HX delta $TX into $DX)
-	($HY delta $TY into $DY)
+(calculate range $DX $DY $Range)
 	(split $DX into $XThousands $XHundreds $XTens $XOnes)
 	(split $DY into $YThousands $YHundreds $YTens $YOnes)
 	(look up range for $XThousands $YThousands into $RangeThousands)
@@ -409,14 +366,156 @@
 	($RangeOnes divided by 10 into $Ones)
 	($Thousands plus $Hundreds into $Sum1)
 	($Tens plus $Ones into $Sum2)
-	($Sum1 plus $Sum2 into $Total)
-	(if) (one unit per square) (then)
-	    ($Total divided by 10 into $Range)
-	(else)
-	    ($Total = $Range)
-	(endif)
+	($Sum1 plus $Sum2 into $Range)
+
+(calculate range for $DX $DY into $Range)
+    (storing positions in units)
+	($DX < 10) ($DY < 10)
+	(look up range for $DX $DY into $RawRange)
+    ($RawRange divided by 100 into $Range rounding evenly)
+
+(calculate range for $DiffX $DiffY into $Range)
+    (storing positions in units)
+    ($DiffX divided by 10 into $DX)
+	($DiffY divided by 10 into $DY)
+	(calculate range $DX $DY $Range)
+
+(calculate range for $DX $DY into $Range)
+	(calculate range $DX $DY $Range)
+
+(calculate range from $Here to $There into $Range)
+	([$HX $HY | $] = $Here)
+	([$TX $TY | $] = $There)
+	($HX delta $TX into $DX)
+	($HY delta $TY into $DY)
+    (calculate range for $DX $DY into $Range)
 
 (range from $Ship to $Target into $Range)
 	($Ship   position $Here)
 	($Target position $There)
 	(calculate range from $Here to $There into $Range)
+
+%%--------------------------------- DIRECTION ---------------------------------
+
+($Y1 is north of $Y2)
+    (if) (y increases south) (then)
+	    ($Y1 < $Y2)
+	(else)
+	    ($Y1 > $Y2)
+	(endif)
+
+($X1 is east of $X2)
+    (if) (x increases west) (then)
+	    ($X1 < $X2)
+	(else)
+	    ($X1 > $X2)
+	(endif)
+
+(octant from $Here to $There into $Octant)
+	([$HX $HY | $] = $Here)
+	([$TX $TY | $] = $There)
+	($HX delta $TX into $DX)
+	($HY delta $TY into $DY)
+	(if) ($TX is east of $HX) (then)
+		(if) ($TY is north of $HY) (then)
+			(if) ($DY > $DX) (then)
+				($Octant = 1)
+			(else)
+				($Octant = 2)
+			(endif)
+		(else)
+			(if) ($DY < $DX) (then)
+				($Octant = 3)
+			(else)
+				($Octant = 4)
+			(endif)
+		(endif)
+	(else)
+		(if) ($TY is north of $HY) (then)
+			(if) ($DY < $DX) (then)
+				($Octant = 7)
+			(else)
+				($Octant = 8)
+			(endif)
+		(else)
+			(if) ($DY > $DX) (then)
+				($Octant = 5)
+			(else)
+				($Octant = 6)
+			(endif)
+		(endif)
+	(endif)
+
+(ortho 1 #north)
+(diag  1 #northeast)
+(ortho 2 #east)
+(diag  2 #northeast)
+(ortho 3 #east)
+(diag  3 #southeast)
+(ortho 4 #south)
+(diag  4 #southeast)
+(ortho 5 #south)
+(diag  5 #southwest)
+(ortho 6 #west)
+(diag  6 #southwest)
+(ortho 7 #west)
+(diag  7 #northwest)
+(ortho 8 #north)
+(diag  8 #northwest)
+
+(direction from $Here to $There into $Direction)
+    (octant from $Here to $There into $Octant)
+	([$HX $HY | $] = $Here)
+	([$TX $TY | $] = $There)
+	($HX delta $TX into $DX)
+	($HY delta $TY into $DY)
+    (sort $DX $DY into $Little $Big)
+    ($Little times 5 into $Diag) %% 5:2 ratio == 22 degrees, half of 45
+	($Big times 2 into $Ortho)
+	(if) ($Diag > $Ortho) (then)
+	    (diag  $Octant $Direction)
+	(else)
+	    (ortho $Octant $Direction)
+	(endif)
+
+(target $Target is $Direction of $Object)
+    ($Object position $Here)
+	($Target position $There)
+	(direction from $Here to $There into $Direction)
+
+%%--------------------------------- MOVEMENT ----------------------------------
+
+($Object moves to square $There)
+    ($Object position $Here)
+	([$ $ | $Tail] = $Here)
+    (closest unoccupied square to $There from $Here into $Square)
+	([$X $Y | $]     = $Square)
+	([$X $Y | $Tail] = $New)
+	(now) ($Object position $New)
+
+($ moves 0 squares $) %% do nothing
+
+($Object moves $Num squares $Direction)
+    (grid object $Object)
+    ($Object position $Here)
+	($Num squares $Direction from $Here into $There)
+	($Object moves to square $There)
+
+($ moves $ squares $) %% don't move if the above fails somehow
+
+($Units units is $Squares squares orthogonally)
+    ($Units divided by 10 into $Squares rounding evenly)
+
+($Units units is $Squares squares diagonally)
+    ($Units divided by 14 into $Squares rounding evenly)
+
+($Object moves $Num units $Direction)
+    (grid object $Object)
+    (if) ($Direction is one of [#northeast #northwest #southeast #southwest])
+    (then)
+        ($Num units is $Squares squares diagonally)
+    (else)
+        ($Num units is $Squares squares orthogonally)
+    (endif)
+    ($Object moves $Squares squares $Direction)
+    %% TODO: move by individual units for shuttles etc.

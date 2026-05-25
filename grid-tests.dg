@@ -23,12 +23,34 @@
 #non-grid-object
 (* initial position [374 474 0])
 
-(set up $)
+(big numbers)
+    (now) (storing positions in units)
+    (exhaust) {
+        *(grid object $Object)
+        ($Object initial position $Position)
+		([$X $Y | $Tail] = $Position)
+		($X times 10 into $XUnits)
+		($XUnits plus 4 into $NewX) %% put them in the middle of the square
+		($Y times 10 into $YUnits)
+		($YUnits plus 4 into $NewY)
+		([$NewX $NewY | $Tail] = $NewPosition)
+		(now) ($Object position $NewPosition)
+	}
+
+(inverted map)
+    (now) (x increases west)
+    (now) ~(y increases south)
+
+(reset map)
 	(now) ~(x increases west)
 	(now) (y increases south)
+	(now) ~(storing positions in units)
+	(now) (map size 1170)
+	(now) (map offset 100)
 	(now) (stacking limit 16383)
-	(now) ~(occupied squares block movement)
-	(now) ~(one unit per square)
+
+(set up $)
+    (reset map)
     (exhaust) {
         *(grid object $Object)
         ($Object initial position $Position)
@@ -36,6 +58,19 @@
 	}
 
 %%-----------------------------------------------------------------------------
+
+#position-schema
+(test *)
+(run *)
+	(#test-ship x 344)
+	(#test-ship y 454)
+
+#place-ship
+(test *)
+(run *)
+	(place #test-ship at [500 500])
+	(#test-ship x 500)
+	(#test-ship y 500)
 
 #max-coords
 (test *)
@@ -67,19 +102,6 @@
 (run *)
 	(position [99 99] is off the map)
 
-#position-schema
-(test *)
-(run *)
-	(#test-ship x 344)
-	(#test-ship y 454)
-
-#place-ship
-(test *)
-(run *)
-	(place #test-ship at [500 500])
-	(#test-ship x 500)
-	(#test-ship y 500)
-
 #target-on-map
 (test *)
 (run *)
@@ -104,6 +126,42 @@
 (run *)
 	(remove #closest-target from the map)
 	(#closest-target position [16383 16383 0])
+
+#max-coords-on-map-big
+(test *)
+(run *)
+    (big numbers)
+	(position [12709 12709] is on the map)
+
+#max-coords-plus-one-not-on-map-big
+(test *)
+(run *)
+    (big numbers)
+	(position [12710 12710] is off the map)
+
+#maxint-not-on-map-big
+(test *)
+(run *)
+    (big numbers)
+	(position [16383 16383] is off the map)
+
+#offset-on-map-big
+(test *)
+(run *)
+    (big numbers)
+	(position [1000 1000] is on the map)
+
+#offset-minus-one-not-on-map-big
+(test *)
+(run *)
+    (big numbers)
+	(position [999 999] is off the map)
+
+#target-on-map-big
+(test *)
+(run *)
+    (big numbers)
+    (#closest-target is on the map)
 
 #object-at-ship-position
 (test *)
@@ -184,45 +242,139 @@
     (now) (stacking limit 1)
     ~(place #closest-target at [344 454])
 
+#closest-unoccupied-square-empty
+(test *)
+(run *)
+	(closest unoccupied square to [879 1044] from [344 454] into [879 1044])
+
+#closest-unoccupied-square-empty-big
+(test *)
+(run *)
+    (big numbers)
+	(closest unoccupied square to [8794 10444] from [3444 4544]
+	         into [8794 10444])
+
+#closest-unoccupied-square-north
+(test *)
+(run *)
+    (now) (stacking limit 1)
+	(closest unoccupied square to [344 454] from [344 444] into [344 453])
+
+#closest-unoccupied-square-north-big
+(test *)
+(run *)
+    (now) (stacking limit 1)
+    (big numbers)
+	(closest unoccupied square to [3444 4544] from [3444 4444] into [3444 4534])
+
+#closest-unoccupied-square-south
+(test *)
+(run *)
+    (now) (stacking limit 1)
+	(closest unoccupied square to [344 454] from [344 466] into [344 455])
+
+#closest-unoccupied-square-south-big
+(test *)
+(run *)
+    (now) (stacking limit 1)
+    (big numbers)
+	(closest unoccupied square to [3444 4544] from [3444 4664] into [3444 4554])
+
+#closest-unoccupied-square-east
+(test *)
+(run *)
+    (now) (stacking limit 1)
+	(closest unoccupied square to [344 454] from [355 454] into [345 454])
+
+#closest-unoccupied-square-west
+(test *)
+(run *)
+    (now) (stacking limit 1)
+	(closest unoccupied square to [344 454] from [333 454] into [343 454])
+
+#closest-unoccupied-square-north-inverted
+(test *)
+(run *)
+    (now) (stacking limit 1)
+    (inverted map)
+	(closest unoccupied square to [344 454] from [344 466] into [344 455])
+
+#closest-unoccupied-square-south-inverted
+(test *)
+(run *)
+    (now) (stacking limit 1)
+    (inverted map)
+	(closest unoccupied square to [344 454] from [344 444] into [344 453])
+
+#closest-unoccupied-square-east-inverted
+(test *)
+(run *)
+    (now) (stacking limit 1)
+    (inverted map)
+	(closest unoccupied square to [344 454] from [333 454] into [343 454])
+
+#closest-unoccupied-square-west-inverted
+(test *)
+(run *)
+    (now) (stacking limit 1)
+    (inverted map)
+	(closest unoccupied square to [344 454] from [355 454] into [345 454])
+
+#closest-unoccupied-square-near-target
+(test *)
+(run *)
+    (now) (stacking limit 1)
+	(#test-ship position $Here)
+	(#near-target position $There)
+	(closest unoccupied square to $There from $Here into [315 425])
+
+#closest-unoccupied-square-far-target
+(test *)
+(run *)
+    (now) (stacking limit 1)
+	(#test-ship position $Here)
+	(#far-target position $There)
+	(closest unoccupied square to $There from $Here into [423 315])
+
 #next-coordinates-north
 (test *)
 (run *)
-	(next coordinates #north from 5 5 into 5 4)
+	(coordinates 1 #north from 5 5 into 5 4)
 
 #next-coordinates-northeast
 (test *)
 (run *)
-	(next coordinates #northeast from 5 5 into 6 4)
+	(coordinates 1 #northeast from 5 5 into 6 4)
 
 #next-coordinates-east
 (test *)
 (run *)
-	(next coordinates #east from 5 5 into 6 5)
+	(coordinates 1 #east from 5 5 into 6 5)
 
 #next-coordinates-southeast
 (test *)
 (run *)
-	(next coordinates #southeast from 5 5 into 6 6)
+	(coordinates 1 #southeast from 5 5 into 6 6)
 
 #next-coordinates-south
 (test *)
 (run *)
-	(next coordinates #south from 5 5 into 5 6)
+	(coordinates 1 #south from 5 5 into 5 6)
 
 #next-coordinates-southwest
 (test *)
 (run *)
-	(next coordinates #southwest from 5 5 into 4 6)
+	(coordinates 1 #southwest from 5 5 into 4 6)
 
 #next-coordinates-west
 (test *)
 (run *)
-	(next coordinates #west from 5 5 into 4 5)
+	(coordinates 1 #west from 5 5 into 4 5)
 
 #next-coordinates-northwest
 (test *)
 (run *)
-	(next coordinates #northwest from 5 5 into 4 4)
+	(coordinates 1 #northwest from 5 5 into 4 4)
 
 #next-square-north
 (test *)
@@ -264,137 +416,269 @@
 (run *)
 	(next square #northwest from [344 454] into [343 453])
 
+#direction-north
+(test *)
+(run *)
+	(direction from [344 454] to [344 453] into #north)
+
+#direction-northeast
+(test *)
+(run *)
+	(direction from [344 454] to [345 453] into #northeast)
+
+#direction-east
+(test *)
+(run *)
+	(direction from [344 454] to [345 454] into #east)
+
+#direction-southeast
+(test *)
+(run *)
+	(direction from [344 454] to [345 455] into #southeast)
+
+#direction-south
+(test *)
+(run *)
+	(direction from [344 454] to [344 455] into #south)
+
+#direction-southwest
+(test *)
+(run *)
+	(direction from [344 454] to [343 455] into #southwest)
+
+#direction-west
+(test *)
+(run *)
+	(direction from [344 454] to [343 454] into #west)
+
+#direction-northwest
+(test *)
+(run *)
+	(direction from [344 454] to [343 453] into #northwest)
+
+#target-closest
+(test *)
+(run *)
+    (target #closest-target is #northeast of #test-ship)
+
+#target-near
+(test *)
+(run *)
+    (target #near-target is #northwest of #test-ship)
+
+#target-far
+(test *)
+(run *)
+    (target #far-target is #northeast of #test-ship)
+
+#target-distant
+(test *)
+(run *)
+    (target #distant-target is #south of #test-ship)
+
 #next-coordinates-north-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
-	(next coordinates #north from 5 5 into 5 6)
+    (inverted map)
+	(coordinates 1 #north from 5 5 into 5 6)
 
 #next-coordinates-northeast-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
-	(next coordinates #northeast from 5 5 into 4 6)
+    (inverted map)
+	(coordinates 1 #northeast from 5 5 into 4 6)
 
 #next-coordinates-east-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
-	(next coordinates #east from 5 5 into 4 5)
+    (inverted map)
+	(coordinates 1 #east from 5 5 into 4 5)
 
 #next-coordinates-southeast-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
-	(next coordinates #southeast from 5 5 into 4 4)
+    (inverted map)
+	(coordinates 1 #southeast from 5 5 into 4 4)
 
 #next-coordinates-south-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
-	(next coordinates #south from 5 5 into 5 4)
+    (inverted map)
+	(coordinates 1 #south from 5 5 into 5 4)
 
 #next-coordinates-southwest-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
-	(next coordinates #southwest from 5 5 into 6 4)
+    (inverted map)
+	(coordinates 1 #southwest from 5 5 into 6 4)
 
 #next-coordinates-west-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
-	(next coordinates #west from 5 5 into 6 5)
+    (inverted map)
+	(coordinates 1 #west from 5 5 into 6 5)
 
 #next-coordinates-northwest-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
-	(next coordinates #northwest from 5 5 into 6 6)
+    (inverted map)
+	(coordinates 1 #northwest from 5 5 into 6 6)
 
 #next-square-north-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(next square #north from [344 454] into [344 455])
 
 #next-square-northeast-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(next square #northeast from [344 454] into [343 455])
 
 #next-square-east-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(next square #east from [344 454] into [343 454])
 
 #next-square-southeast-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(next square #southeast from [344 454] into [343 453])
 
 #next-square-south-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(next square #south from [344 454] into [344 453])
 
 #next-square-southwest-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(next square #southwest from [344 454] into [345 453])
 
 #next-square-west-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(next square #west from [344 454] into [345 454])
 
 #next-square-northwest-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(next square #northwest from [344 454] into [345 455])
+
+#direction-south-inverted
+(test *)
+(run *)
+    (inverted map)
+	(direction from [344 454] to [344 453] into #south)
+
+#direction-southwest-inverted
+(test *)
+(run *)
+    (inverted map)
+	(direction from [344 454] to [345 453] into #southwest)
+
+#direction-west-inverted
+(test *)
+(run *)
+    (inverted map)
+	(direction from [344 454] to [345 454] into #west)
+
+#direction-northwest-inverted
+(test *)
+(run *)
+    (inverted map)
+	(direction from [344 454] to [345 455] into #northwest)
+
+#direction-north-inverted
+(test *)
+(run *)
+    (inverted map)
+	(direction from [344 454] to [344 455] into #north)
+
+#direction-northeast-inverted
+(test *)
+(run *)
+    (inverted map)
+	(direction from [344 454] to [343 455] into #northeast)
+
+#direction-east-inverted
+(test *)
+(run *)
+    (inverted map)
+	(direction from [344 454] to [343 454] into #east)
+
+#direction-southeast-inverted
+(test *)
+(run *)
+    (inverted map)
+	(direction from [344 454] to [343 453] into #southeast)
+
+#target-closest-inverted
+(test *)
+(run *)
+    (inverted map)
+    (target #closest-target is #southwest of #test-ship)
+
+#target-near-inverted
+(test *)
+(run *)
+    (inverted map)
+    (target #near-target is #southeast of #test-ship)
+
+#target-far-inverted
+(test *)
+(run *)
+    (inverted map)
+    (target #far-target is #southwest of #test-ship)
+
+#target-distant-inverted
+(test *)
+(run *)
+    (inverted map)
+    (target #distant-target is #north of #test-ship)
 
 #look-up-range-0-1
 (test *)
-(run *)
-	(look up range for 0 1 into 100)
+(run *)	(look up range for 0 1 into 100)
 
 #look-up-range-1-1
 (test *)
-(run *)
-	(look up range for 1 1 into 141)
+(run *)	(look up range for 1 1 into 141)
 
 #look-up-range-6-4
 (test *)
-(run *)
-	(look up range for 6 4 into 721)
+(run *)	(look up range for 6 4 into 721)
 
 #look-up-range-9-8
 (test *)
-(run *)
-	(look up range for 9 8 into 1204)
+(run *)	(look up range for 9 8 into 1204)
+
+#look-up-range-10-11
+(test *)
+(run *)	~(look up range for 10 11 into $)
+
+#look-up-range-11-11
+(test *)
+(run *)	~(look up range for 11 11 into $)
+
+#look-up-range-10-20
+(test *)
+(run *)	~(look up range for 10 20 into $)
+
+#look-up-range-20-20
+(test *)
+(run *)	~(look up range for 20 20 into $)
+
+#look-up-range-21-21
+(test *)
+(run *)	~(look up range for 21 21 into $)
 
 #range-to-closest
 (test *)
@@ -416,29 +700,29 @@
 (run *)
 	(range from #test-ship to #distant-target into 6049)
 
-#range-to-closest-small
+#range-to-closest-big
 (test *)
 (run *)
-    (now) (one unit per square)
-	(range from #test-ship to #closest-target into 14)
+    (big numbers)
+	(range from #test-ship to #closest-target into 141)
 
-#range-to-near-small
+#range-to-near-big
 (test *)
 (run *)
-    (now) (one unit per square)
-	(range from #test-ship to #near-target into 42)
+    (big numbers)
+	(range from #test-ship to #near-target into 424)
 
-#range-to-far-small
+#range-to-far-big
 (test *)
 (run *)
-    (now) (one unit per square)
-	(range from #test-ship to #far-target into 189)
+    (big numbers)
+	(range from #test-ship to #far-target into 1894)
 
-#range-to-distant-small
+#range-to-distant-big
 (test *)
 (run *)
-    (now) (one unit per square)
-	(range from #test-ship to #distant-target into 604)
+    (big numbers)
+	(range from #test-ship to #distant-target into 6049)
 
 %% maximum distance we can represent
 #range-to-very-distant
@@ -519,101 +803,62 @@
 #7-squares-north-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(7 squares #north from [344 454] into [344 461])
 
 #6-squares-northeast-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(6 squares #northeast from [344 454] into [338 460])
 
 #2-squares-east-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(2 squares #east from [344 454] into [342 454])
 
 #5-squares-southeast-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(5 squares #southeast from [344 454] into [339 449])
 
 #20-squares-south-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(20 squares #south from [344 454] into [344 434])
 
 #24-squares-southwest-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(24 squares #southwest from [344 454] into [368 430])
 
 #50-squares-west-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(50 squares #west from [344 454] into [394 454])
 
 #4-squares-northwest-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(4 squares #northwest from [344 454] into [348 458])
 
 #11-squares-east-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(11 squares #east from [344 454] into [333 454])
 
 #11-squares-north-inverted
 (test *)
 (run *)
-	(now) (x increases west)
-	(now) ~(y increases south)
+    (inverted map)
 	(11 squares #north from [344 454] into [344 465])
-
-#can-jump
-(test *)
-(run *)
-    (#test-ship can jump 1 obstacles)
-	(#test-ship can jump 16383 obstacles)
-
-#next-unoccupied-square-north-1
-(test *)
-(run *)
-    (now) (stacking limit 1)
-    (next unoccupied square #north from [344 454] is 1 away)
-
-#next-unoccupied-square-north-2
-(test *)
-(run *)
-    (now) (stacking limit 1)
-    (place #closest-target at [344 453])
-    (next unoccupied square #north from [344 454] is 2 away)
-
-#next-unoccupied-square-north-5
-(test *)
-(run *)
-    (now) (stacking limit 1)
-    (place #closest-target at [344 453])
-    (place #near-target at [344 452])
-    (place #far-target at [344 451])
-    (place #distant-target at [344 450])
-    (next unoccupied square #north from [344 454] is 5 away)
 
 #move-1-square-north
 (test *)
@@ -691,60 +936,10 @@
 #blocked-1
 (test *)
 (run *)
-    (now) (occupied squares block movement)
-	(now) (stacking limit 1)
+    (now) (stacking limit 1)
 	(place #closest-target at [344 453])
 	(#closest-target moves 1 squares #south)
 	(#closest-target position [344 453 | $])
-
-#blocked-2
-(test *)
-(run *)
-    (now) (occupied squares block movement)
-	(now) (stacking limit 1)
-	(place #closest-target at [344 453])
-	(#closest-target moves 2 squares #south)
-	(#closest-target position [344 453 | $])
-
-#jump-1
-(test *)
-(run *)
-    (now) (stacking limit 1)
-    (place #closest-target at [344 453])
-	(#test-ship moves 2 squares #north)
-	(#test-ship position [344 452 | $])
-
-#jump-and-move
-(test *)
-(run *)
-    (now) (stacking limit 1)
-    (place #closest-target at [344 453])
-	(#test-ship moves 3 squares #north)
-	(#test-ship position [344 451 | $])
-
-(#test-ship can jump $Num obstacles)
-    (just) ~($Num = 4)
-
-#can-jump
-(test *)
-(run *)
-    (#test-ship can jump 1 obstacles)
-
-#cant-jump
-(test *)
-(run *)
-    ~(#test-ship can jump 4 obstacles)
-
-#dont-jump-4
-(test *)
-(run *)
-    (now) (stacking limit 1)
-    (place #closest-target at [344 453])
-    (place #near-target at [344 452])
-    (place #far-target at [344 451])
-    (place #distant-target at [344 450])
-    (#test-ship moves 5 squares #north)
-    (#test-ship position [344 454 | $])
 
 #0-units-ortho
 (test *)
@@ -781,41 +976,41 @@
 (run *)
     (16383 units is 1638 squares orthogonally)
 
-#0-units-ortho-small
+#0-units-ortho-big
 (test *)
 (run *)
-    (now) (one unit per square)
+    (big numbers)
     (0 units is 0 squares orthogonally)
 
-#4-units-ortho-small
+#4-units-ortho-big
 (test *)
 (run *)
-    (now) (one unit per square)
-    (4 units is 4 squares orthogonally)
+    (big numbers)
+    (4 units is 0 squares orthogonally)
 
-#5-units-ortho-small
+#5-units-ortho-big
 (test *)
 (run *)
-    (now) (one unit per square)
-    (5 units is 5 squares orthogonally)
+    (big numbers)
+    (5 units is 1 squares orthogonally)
 
-#34-units-ortho-small
+#34-units-ortho-big
 (test *)
 (run *)
-    (now) (one unit per square)
-    (34 units is 34 squares orthogonally)
+    (big numbers)
+    (34 units is 3 squares orthogonally)
 
-#1170-units-ortho-small
+#1170-units-ortho-big
 (test *)
 (run *)
-    (now) (one unit per square)
-    (1170 units is 1170 squares orthogonally)
+    (big numbers)
+    (11700 units is 1170 squares orthogonally)
 
-#16383-units-ortho-small
+#16383-units-ortho-big
 (test *)
 (run *)
-    (now) (one unit per square)
-    (16383 units is 16383 squares orthogonally)
+    (big numbers)
+    (16383 units is 1638 squares orthogonally)
 
 #0-units-diag
 (test *)
@@ -847,47 +1042,41 @@
 (run *)
     (16383 units is 1170 squares diagonally)
 
-#0-units-diag-small
+#0-units-diag-big
 (test *)
 (run *)
-    (now) (one unit per square)
+    (big numbers)
     (0 units is 0 squares diagonally)
 
-#3-units-diag-small
+#6-units-diag-big
 (test *)
 (run *)
-    (now) (one unit per square)
-    (3 units is 2 squares diagonally)
+    (big numbers)
+    (6 units is 0 squares diagonally)
 
-#6-units-diag-small
+#7-units-diag-big
 (test *)
 (run *)
-    (now) (one unit per square)
-    (6 units is 4 squares diagonally)
+    (big numbers)
+    (7 units is 1 squares diagonally)
 
-#7-units-diag-small
+#34-units-diag-big
 (test *)
 (run *)
-    (now) (one unit per square)
-    (7 units is 5 squares diagonally)
+    (big numbers)
+    (34 units is 2 squares diagonally)
 
-#34-units-diag-small
+#35-units-diag-big
 (test *)
 (run *)
-    (now) (one unit per square)
-    (34 units is 24 squares diagonally)
+    (big numbers)
+    (35 units is 3 squares diagonally)
 
-#35-units-diag-small
+#1638-units-diag-big
 (test *)
 (run *)
-    (now) (one unit per square)
-    (35 units is 25 squares diagonally)
-
-#1638-units-diag-small
-(test *)
-(run *)
-    (now) (one unit per square)
-    (1638 units is 1170 squares diagonally) %% max supported size anyway
+    (big numbers)
+    (16383 units is 1170 squares diagonally)
 
 #move-10-units-north
 (test *)
@@ -895,12 +1084,12 @@
 	(#test-ship moves 10 units #north)
 	(#test-ship position [344 453 | $])
 
-#move-10-units-north-small
+#move-10-units-north-big
 (test *)
 (run *)
-    (now) (one unit per square)
-	(#test-ship moves 1 units #north)
-	(#test-ship position [344 453 | $])
+    (big numbers)
+	(#test-ship moves 10 units #north)
+	(#test-ship position [3444 4534 | $])
 
 #move-70-units-north
 (test *)
@@ -908,12 +1097,12 @@
 	(#test-ship moves 70 units #north)
 	(#test-ship position [344 447 | $])
 
-#move-7-units-north-small
+#move-70-units-north-big
 (test *)
 (run *)
-    (now) (one unit per square)
-	(#test-ship moves 7 units #north)
-	(#test-ship position [344 447 | $])
+    (big numbers)
+	(#test-ship moves 70 units #north)
+	(#test-ship position [3444 4474 | $])
 
 #move-84-units-northeast
 (test *)
@@ -921,12 +1110,12 @@
 	(#test-ship moves 84 units #northeast)
 	(#test-ship position [350 448 | $])
 
-#move-8-units-northeast-small
+#move-84-units-northeast-big
 (test *)
 (run *)
-    (now) (one unit per square)
-	(#test-ship moves 8 units #northeast)
-	(#test-ship position [350 448 | $])
+    (big numbers)
+	(#test-ship moves 84 units #northeast)
+	(#test-ship position [3504 4484 | $])
 
 #move-20-units-east
 (test *)
@@ -934,12 +1123,12 @@
 	(#test-ship moves 20 units #east)
 	(#test-ship position [346 454 | $])
 
-#move-2-units-east-small
+#move-20-units-east-big
 (test *)
 (run *)
-    (now) (one unit per square)
-	(#test-ship moves 2 units #east)
-	(#test-ship position [346 454 | $])
+    (big numbers)
+	(#test-ship moves 20 units #east)
+	(#test-ship position [3464 4544 | $])
 
 #move-70-squares-southeast
 (test *)
@@ -947,25 +1136,25 @@
 	(#test-ship moves 70 units #southeast)
 	(#test-ship position [349 459 | $])
 
-#move-7-units-southeast-small
+#move-70-units-southeast-big
 (test *)
 (run *)
-    (now) (one unit per square)
-	(#test-ship moves 7 units #southeast)
-	(#test-ship position [349 459 | $])
+    (big numbers)
+	(#test-ship moves 70 units #southeast)
+	(#test-ship position [3494 4594 | $])
 
-#move-20-squares-south
+#move-200-units-south
 (test *)
 (run *)
 	(#test-ship moves 200 units #south)
 	(#test-ship position [344 474 | $])
 
-#move-20-units-south-small
+#move-20-squares-south-big
 (test *)
 (run *)
-    (now) (one unit per square)
-	(#test-ship moves 20 units #south)
-	(#test-ship position [344 474 | $])
+    (big numbers)
+	(#test-ship moves 200 units #south)
+	(#test-ship position [3444 4744 | $])
 
 #move-336-units-southwest
 (test *)
@@ -973,12 +1162,12 @@
 	(#test-ship moves 336 units #southwest)
 	(#test-ship position [320 478 | $])
 
-#move-34-units-southwest-small
+#move-336-units-southwest-big
 (test *)
 (run *)
-    (now) (one unit per square)
-	(#test-ship moves 34 units #southwest)
-	(#test-ship position [320 478 | $])
+    (big numbers)
+	(#test-ship moves 336 units #southwest)
+	(#test-ship position [3204 4784 | $])
 
 #move-500-units-west
 (test *)
@@ -986,12 +1175,12 @@
 	(#test-ship moves 500 units #west)
 	(#test-ship position [294 454 | $])
 
-#move-50-units-west-small
+#move-500-units-west-big
 (test *)
 (run *)
-    (now) (one unit per square)
-	(#test-ship moves 50 units #west)
-	(#test-ship position [294 454 | $])
+    (big numbers)
+	(#test-ship moves 500 units #west)
+	(#test-ship position [2944 4544 | $])
 
 #move-56-units-northwest
 (test *)
@@ -999,9 +1188,49 @@
 	(#test-ship moves 56 units #northwest)
 	(#test-ship position [340 450 | $])
 
-#move-6-units-northwest-small
+#move-56-units-northwest-big
 (test *)
 (run *)
-    (now) (one unit per square)
-	(#test-ship moves 6 units #northwest)
-	(#test-ship position [340 450 | $])
+    (big numbers)
+	(#test-ship moves 56 units #northwest)
+	(#test-ship position [3404 4504 | $])
+
+#octant-1
+(test *)
+(run *)
+	(octant from [344 454] to [345 452] into 1)
+
+#octant-2
+(test *)
+(run *)
+	(octant from [344 454] to [346 453] into 2)
+
+#octant-3
+(test *)
+(run *)
+	(octant from [344 454] to [346 455] into 3)
+
+#octant-4
+(test *)
+(run *)
+	(octant from [344 454] to [345 456] into 4)
+
+#octant-5
+(test *)
+(run *)
+	(octant from [344 454] to [343 456] into 5)
+
+#octant-6
+(test *)
+(run *)
+	(octant from [344 454] to [342 455] into 6)
+
+#octant-7
+(test *)
+(run *)
+	(octant from [344 454] to [342 453] into 7)
+
+#octant-8
+(test *)
+(run *)
+	(octant from [344 454] to [343 452] into 8)
