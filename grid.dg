@@ -17,11 +17,9 @@
 
 ~(x increases west) %% un-negate to make X increase as you go west, not east
 
-(y increases south) %% un-negate to make Y increase as you go south not north
+~(y increases south) %% un-negate to make Y increase as you go south not north
 
-(storing positions in units) %% un-negage to store in units, not grid squares
-
-~(occupied squares block movement) %% un-negate to make objects obstacles
+~(storing positions in units) %% un-negage to store in units, not grid squares
 
 %% The maximum grid size is 1170 x 1170, unless you're willing to have ranges
 %% not be able to be calcuated between two distant objects, in which case you
@@ -31,9 +29,9 @@
 %% you wish. For safety, starting the origin at [100 100] rather than [0 0] can
 %% prevent subtraction overflows.
 
-(global variable (map offset 1000)) %% recommended safety margin
+(global variable (map offset 100)) %% recommended safety margin
 
-(global variable (map size 1170))  %% largest map that we can range across
+(global variable (map size  1170)) %% max we can range across
 
 (global variable (stacking limit 16383)) %% max objects per square
 
