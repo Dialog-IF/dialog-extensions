@@ -31,7 +31,7 @@
 
 (global variable (map offset 100)) %% recommended safety margin
 
-(global variable (map size  1170)) %% max we can range across
+(global variable (map size 1170)) %% max we can range across
 
 (global variable (stacking limit 16383)) %% max objects per square
 
