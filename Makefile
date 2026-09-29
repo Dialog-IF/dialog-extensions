@@ -33,6 +33,9 @@ grid:
 bearing:
 	$(DEBUG) bearing-tests.dg bearing.dg grid.dg utils.dg $(STDLIB)
 
+plists:
+	$(DEBUG) plists-tests.dg plists.dg $(STDLIB)
+
 clean:
 	rm -f *~ \#*\# *.z5 *.z8 *.zblorb *.aastory *.d64 *.d71
 
